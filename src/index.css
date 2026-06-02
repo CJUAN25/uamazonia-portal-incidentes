@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Ambient cinematic background ── */
+.ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAati9a7IHYvFhLgM8RA1SmvOth7p9vespfy9gU8lKVUYtZ2xvVtvMaNHEdXhmM6fC2nFk18Gjayek_6z7XXD-jaKERxH9wxWuWw7eFT_0e78469XO4sM5UKzWXjJvz6ITfO58dBuFrs5NxU5GmLBs-0RMHp6TUhtxC6-ejjhX7jqeoWLE41sqtQe2igneGeE7eDlq3xVEzLFn44gcItN2IR5-o7T-zNrYY2Q111FZQffCE7pEDpULkiR3AS5aXflnp5St58iM-4Hk);
+  background-size: cover;
+  background-position: center;
+  filter: blur(40px) brightness(0.3);
+  transform: scale(1.1);
+}
+
+/* ── Glassmorphic panel ── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+.dark .glass-panel {
+  background: rgba(48, 55, 44, 0.6);
+  backdrop-filter: blur(40px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Hide scrollbar for clean look ── */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Drawer slide-in animation ── */
+.drawer-slide-in {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* ── Custom scrollbar for drawers ── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #f3f4f6;
+  border-radius: 20px;
+}
+
+/* ── Toggle switch styles (Settings page) ── */
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #34AB1E;
+}
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #34AB1E;
+}
+
+/* ── Fade-in animation for drawer overlays ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Print utility ── */
+@media print {
+  .print-only { display: block !important; }
+  .print\:hidden { display: none !important; }
+}
+
+/* ── Admin drawer dark scrollbar ── */
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background-color: #3f4a39;
+  border-radius: 10px;
+}
+
+/* ── Timeline border for group detail ── */
+.timeline-border::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #30372c;
+}
+
+@media print {
+  /* Regla 1: Ocultar barra lateral siempre */
+  #admin-sidebar, #admin-topbar { 
+    display: none !important; 
+  }
+
+  /* Regla 2: Cuando se imprime desde el Drawer, destruir visualmente el fondo */
+  body.printing-drawer #dashboard-content-wrapper {
+    display: none !important;
+  }
+
+  /* Regla 3: Formateo del Drawer como un documento normal para evitar recortes */
+  body.printing-drawer #admin-incident-drawer {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    transform: none !important;
+    box-shadow: none !important;
+    background-color: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Regla 4: Ocultar botones interactivos */
+  .hide-on-print {
+    display: none !important;
+  }
+}
