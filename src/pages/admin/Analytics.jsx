@@ -41,7 +41,7 @@ export default function Analytics() {
   };
 
   const isStagnant = (inc) => {
-    if (inc.status !== 'En Proceso' && inc.status !== 'Reportado') return false;
+    if (inc.status !== 'En proceso' && inc.status !== 'Reportado') return false;
     const incDate = parseIncidentDate(inc.date);
     const diffTime = Math.abs(new Date() - incDate);
     const diffHours = diffTime / (1000 * 60 * 60);
@@ -74,7 +74,7 @@ export default function Analytics() {
 
   const total = filteredList.length;
   const nuevos = filteredList.filter(i => i.status === 'Reportado').length;
-  const enProceso = filteredList.filter(i => i.status === 'En Proceso').length;
+  const enProceso = filteredList.filter(i => i.status === 'En proceso').length;
   const resueltos = filteredList.filter(i => i.status === 'Resuelto').length;
   const estancados = filteredList.filter(i => isStagnant(i)).length;
 
@@ -85,7 +85,7 @@ export default function Analytics() {
   };
 
   const resueltosPct = getStatusPct('Resuelto');
-  const enProcesoPct = getStatusPct('En Proceso');
+  const enProcesoPct = getStatusPct('En proceso');
   const reportadosPct = getStatusPct('Reportado');
 
   // Static array of all categories from NewReportDrawer

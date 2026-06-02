@@ -90,7 +90,7 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 md:mb-12 print:hidden">
           {/* Filtros e Icono de Buscar */}
           <div className="flex flex-wrap items-center gap-3">
-            {['Todos', 'Reportados', 'En Proceso', 'Resueltos'].map((filter) => {
+            {['Todos', 'Reportados', 'En proceso', 'Resueltos'].map((filter) => {
               const isActive = activeFilter === filter;
               return (
                 <button
@@ -102,7 +102,7 @@ export default function Dashboard() {
                       : 'bg-surface-container-low text-on-surface-variant border border-outline-variant hover:border-primary/50'
                   }`}
                 >
-                  {filter}
+                  {filter === 'En proceso' ? 'En Proceso' : filter}
                 </button>
               );
             })}
@@ -151,7 +151,7 @@ export default function Dashboard() {
           {filteredIncidentes.map((inc, index) => {
             const { article, isFeatured } = getBentoClasses(index);
             const statusConfig = {
-              'En Proceso': { dot: 'bg-blue-500', glow: 'bg-blue-400', text: 'text-blue-400' },
+              'En proceso': { dot: 'bg-blue-500', glow: 'bg-blue-400', text: 'text-blue-400' },
               'Reportado': { dot: 'bg-orange-500', glow: 'bg-orange-400', text: 'text-orange-400' },
               'Resuelto': { dot: 'bg-green-500', glow: 'bg-green-400', text: 'text-green-400' }
             };
@@ -249,11 +249,16 @@ export default function Dashboard() {
             <div className="col-span-full py-12 text-center text-zinc-400 font-body-md bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl">
               Cargando incidentes reales desde Supabase...
             </div>
-          ) : filteredIncidentes.length === 0 && (
+          ) : incidentes.length === 0 ? (
+            <div className="col-span-full py-16 text-center text-zinc-400 font-body-md bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl flex flex-col items-center justify-center gap-3">
+              <span className="material-symbols-outlined text-4xl text-zinc-550">task</span>
+              <p className="font-semibold text-zinc-300">No hay incidentes reportados</p>
+            </div>
+          ) : filteredIncidentes.length === 0 ? (
             <div className="col-span-full py-12 text-center text-on-surface-variant font-body-md bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl">
               No se encontraron incidentes que coincidan con la búsqueda o el filtro seleccionado.
             </div>
-          )}
+          ) : null}
 
           {/* Card 4: Quick Action / Status */}
           <article className="bg-surface-container-low border border-outline-variant rounded-xl p-6 sm:p-8 md:col-span-2 xl:col-span-6 flex items-center justify-center relative overflow-hidden print:hidden">

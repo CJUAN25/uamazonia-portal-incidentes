@@ -7,6 +7,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const redirectUser = (userEmail) => {
@@ -29,6 +30,7 @@ export default function Login() {
     }
 
     const toastId = toast.loading('Iniciando sesión...');
+    setIsLoading(true);
 
     try {
       // 1. Intentar iniciar sesión
@@ -79,11 +81,14 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       toast.error('Ocurrió un error inesperado al iniciar sesión', { id: toastId });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSSO = async (proveedor) => {
     const toastId = toast.loading('Conectando con ' + proveedor + '...');
+    setIsLoading(true);
     try {
       const providerName = proveedor.toLowerCase() === 'google' ? 'google' : 'azure';
       const { error } = await supabase.auth.signInWithOAuth({
@@ -96,6 +101,9 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       toast.error('Error al conectar con ' + proveedor + ': ' + err.message, { id: toastId });
+    } finally {
+      setIsLoading(false);
+      toast.dismiss(toastId);
     }
   };
 
@@ -105,6 +113,7 @@ export default function Login() {
       return;
     }
     const toastId = toast.loading('Enviando correo de recuperación...');
+    setIsLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: window.location.origin,
@@ -114,6 +123,8 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       toast.error('Error al enviar correo de recuperación: ' + err.message, { id: toastId });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -275,9 +286,10 @@ export default function Login() {
           {/* Botón Principal */}
           <button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] mt-2 active:scale-[0.98]"
+            disabled={isLoading}
+            className={`w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] mt-2 active:scale-[0.98] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Ingresar al Portal
+            {isLoading ? 'Cargando...' : 'Ingresar al Portal'}
           </button>
         </form>
 
@@ -293,7 +305,8 @@ export default function Login() {
           <button
             type="button"
             onClick={() => handleSSO('Google')}
-            className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center gap-3 py-2.5 rounded-xl transition-colors active:scale-[0.98]"
+            disabled={isLoading}
+            className={`w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center gap-3 py-2.5 rounded-xl transition-colors active:scale-[0.98] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {/* Google SVG */}
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -307,7 +320,8 @@ export default function Login() {
           <button
             type="button"
             onClick={() => handleSSO('Microsoft')}
-            className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center gap-3 py-2.5 rounded-xl transition-colors active:scale-[0.98]"
+            disabled={isLoading}
+            className={`w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white flex items-center justify-center gap-3 py-2.5 rounded-xl transition-colors active:scale-[0.98] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {/* Microsoft SVG */}
             <svg className="w-5 h-5" viewBox="0 0 23 23" fill="currentColor">

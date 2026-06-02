@@ -82,9 +82,9 @@ export default function AdminLayout() {
   ];
 
   return (
-    <div className="h-screen w-full relative flex text-white overflow-hidden bg-black">
+    <div className="h-[100dvh] w-full fixed inset-0 overflow-hidden overscroll-none flex text-white bg-black">
       {/* Ambient Glassmorphism Background */}
-      <div className="fixed inset-0 z-0 print:hidden">
+      <div className="fixed inset-0 -z-10 pointer-events-none print:hidden">
         <img src="/images/bg-campus.jpg" alt="Fondo" className="w-full h-full object-cover opacity-20" />
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-emerald-500/20 blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none"></div>
@@ -235,7 +235,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Área de Scroll Interno (El secreto del Layout) */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

@@ -80,11 +80,11 @@ export default function AdminIncidentDrawer({ isOpen, onClose, incident }) {
       {/* Drawer Container */}
       <section
         id="admin-incident-drawer"
-        className="drawer-slide-in w-full max-w-[600px] bg-black/60 backdrop-blur-2xl border-l border-white/10 flex flex-col h-full overflow-hidden pointer-events-auto print:relative print:w-full print:h-auto print:overflow-visible print:shadow-none print:border-none print:translate-x-0 print:transform-none print:bg-white print:text-black print:p-0"
+        className="drawer-slide-in w-full max-w-[600px] h-[100dvh] flex flex-col bg-zinc-900/95 backdrop-blur-3xl border-l border-white/10 overflow-hidden pointer-events-auto print:relative print:w-full print:h-auto print:overflow-visible print:shadow-none print:border-none print:translate-x-0 print:transform-none print:bg-white print:text-black print:p-0"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sticky Header */}
-        <header className="sticky top-0 z-10 bg-black/40 backdrop-blur-md px-6 py-6 border-b border-white/10 flex items-center justify-between print:bg-white print:text-black print:border-none">
+        {/* Sticky Header (Fijo) */}
+        <header className="flex-shrink-0 z-20 sticky top-0 bg-black/40 backdrop-blur-md px-6 py-6 border-b border-white/10 flex items-center justify-between print:bg-white print:text-black print:border-none">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               <span className="bg-primary/20 text-primary font-label-caps text-[10px] px-3 py-1 rounded-full uppercase tracking-widest print:border print:border-primary">
@@ -105,7 +105,7 @@ export default function AdminIncidentDrawer({ isOpen, onClose, incident }) {
         </header>
 
         {/* Body (Scrollable) */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-10 print:overflow-visible print:max-h-none print:p-0 print:space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar p-4 md:p-6 space-y-10 print:overflow-visible print:max-h-none print:p-0 print:space-y-6">
           {/* Evidence Image */}
           <div className="relative group print:relative print:w-full print:h-auto print:max-h-64 print:break-inside-avoid">
             <div className="rounded-xl overflow-hidden border border-white/10 aspect-video bg-black/40 print:border-none print:rounded-none">
@@ -153,37 +153,19 @@ export default function AdminIncidentDrawer({ isOpen, onClose, incident }) {
           </div>
 
           {/* Admin Action Block */}
-          <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl p-6 space-y-6 print:hidden">
+          <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl p-6 space-y-4 print:hidden">
             <p className="font-label-caps text-white uppercase text-[11px] tracking-widest font-semibold">Gestión Administrativa</p>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="font-label-caps text-zinc-400 text-[10px]">Actualizar Estado</label>
-                <select
-                  value={selectedStatus}
-                  onChange={handleChangeStatus}
-                  className="w-full bg-black/40 border border-white/10 rounded-lg text-white font-body-md py-3 px-4 focus:ring-2 focus:ring-primary transition-all appearance-none cursor-pointer outline-none"
-                >
-                  <option value="Reportado">Reportado</option>
-                  <option value="En Proceso">En Proceso</option>
-                  <option value="Resuelto">Resuelto</option>
-                </select>
-              </div>
-              
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSave}
-                  className="flex-grow bg-primary hover:bg-primary/95 text-white font-label-caps text-[13px] py-4 rounded-lg transition-all active:scale-[0.98] shadow-lg shadow-primary/10"
-                >
-                  GUARDAR CAMBIOS
-                </button>
-                <button
-                  onClick={handlePrint}
-                  className="px-6 py-4 rounded-lg border-2 border-primary text-primary font-label-caps text-[13px] hover:bg-primary/10 transition-colors flex items-center justify-center gap-2 print:hidden hide-on-print"
-                >
-                  <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-                  PDF
-                </button>
-              </div>
+            <div className="space-y-2">
+              <label className="font-label-caps text-zinc-400 text-[10px]">Actualizar Estado</label>
+              <select
+                value={selectedStatus}
+                onChange={handleChangeStatus}
+                className="w-full bg-black/40 border border-white/10 rounded-lg text-white font-body-md py-3 px-4 focus:ring-2 focus:ring-primary transition-all appearance-none cursor-pointer outline-none font-sans"
+              >
+                <option value="Reportado">Reportado</option>
+                <option value="En proceso">En Proceso</option>
+                <option value="Resuelto">Resuelto</option>
+              </select>
             </div>
           </div>
 
@@ -200,7 +182,7 @@ export default function AdminIncidentDrawer({ isOpen, onClose, incident }) {
                   <div className={`w-2.5 h-2.5 rounded-full mt-2 shrink-0 ${
                     hist.estado === 'Resuelto' 
                       ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' 
-                      : hist.estado === 'En Proceso' 
+                      : hist.estado === 'En proceso' 
                       ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]' 
                       : 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]'
                   } print:shadow-none`} />
@@ -215,6 +197,23 @@ export default function AdminIncidentDrawer({ isOpen, onClose, incident }) {
             </div>
           </div>
         </div>
+
+        {/* Footer de Botones Fijo */}
+        <footer className="flex-shrink-0 p-4 md:p-6 border-t border-white/10 bg-zinc-900/80 pb-8 md:pb-6 z-20 mt-auto flex gap-2 print:hidden">
+          <button
+            onClick={handleSave}
+            className="flex-grow bg-primary hover:bg-primary/95 text-white font-label-caps text-[13px] py-4 rounded-lg transition-all active:scale-[0.98] shadow-lg shadow-primary/10 font-sans font-bold"
+          >
+            GUARDAR CAMBIOS
+          </button>
+          <button
+            onClick={handlePrint}
+            className="px-6 py-4 rounded-lg border-2 border-primary text-primary font-label-caps text-[13px] hover:bg-primary/10 transition-colors flex items-center justify-center gap-2 print:hidden hide-on-print font-sans font-bold"
+          >
+            <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+            PDF
+          </button>
+        </footer>
       </section>
     </div>
   );

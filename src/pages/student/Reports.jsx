@@ -43,7 +43,7 @@ export default function Reports() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'En Proceso':
+      case 'En proceso':
         return <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-medium">En Proceso</span>;
       case 'Reportado':
         return <span className="bg-orange-100 text-orange-800 text-xs px-2.5 py-0.5 rounded-full font-medium">Reportado</span>;
@@ -69,8 +69,9 @@ export default function Reports() {
               Cargando tus reportes desde Supabase...
             </div>
           ) : incidentes.length === 0 ? (
-            <div className="text-center py-12 text-zinc-400 font-body-md">
-              No tienes ningún reporte registrado.
+            <div className="text-center py-16 text-zinc-400 font-body-md flex flex-col items-center justify-center gap-3">
+              <span className="material-symbols-outlined text-4xl text-zinc-550">task</span>
+              <p className="font-semibold text-zinc-300">No hay incidentes reportados</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse hidden md:table">

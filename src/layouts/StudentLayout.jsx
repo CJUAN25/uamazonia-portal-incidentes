@@ -8,6 +8,7 @@ export default function StudentLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const notifBtnRef = useRef(null);
   const notifDropdownRef = useRef(null);
 
@@ -28,7 +29,7 @@ export default function StudentLayout() {
   }, []);
 
   const handleSignOut = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const toastId = toast.loading('Cerrando sesión...');
     try {
       await supabase.auth.signOut();
@@ -45,14 +46,17 @@ export default function StudentLayout() {
   // Close notifications on click outside or Escape
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        isNotificationsOpen &&
-        notifDropdownRef.current &&
-        !notifDropdownRef.current.contains(e.target) &&
-        notifBtnRef.current &&
-        !notifBtnRef.current.contains(e.target)
-      ) {
-        setIsNotificationsOpen(false);
+      if (isNotificationsOpen) {
+        const dropdown = notifDropdownRef.current;
+        const btn = notifBtnRef.current;
+        if (
+          dropdown &&
+          !dropdown.contains(e.target) &&
+          (!btn || !btn.contains(e.target)) &&
+          !e.target.closest('.notif-btn')
+        ) {
+          setIsNotificationsOpen(false);
+        }
       }
     };
     const handleEscape = (e) => {
@@ -69,131 +73,166 @@ export default function StudentLayout() {
     };
   }, [isNotificationsOpen]);
 
+  const navLinks = [
+    { to: '/estudiante', label: 'Panel Principal', icon: 'dashboard' },
+    { to: '/estudiante/reportes', label: 'Mis Reportes', icon: 'analytics' },
+    { to: '/estudiante/ayuda', label: 'Centro de Ayuda', icon: 'help_outline' },
+  ];
+
   return (
-    <div className="min-h-screen w-full relative flex text-white overflow-hidden bg-black selection:bg-primary selection:text-on-primary">
-      {/* Ambient cinematic background */}
-      <div className="fixed inset-0 z-0 print:hidden">
+    <div className="h-[100dvh] w-full fixed inset-0 overflow-hidden overscroll-none flex text-white bg-black">
+      {/* Ambient Glassmorphism Background */}
+      <div className="fixed inset-0 -z-10 pointer-events-none print:hidden">
         <img src="/images/bg-campus.jpg" alt="Fondo" className="w-full h-full object-cover opacity-20" />
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-emerald-500/20 blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none"></div>
       </div>
 
-      {/* SideNavBar / BottomNav Component */}
-      <nav className="bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl fixed z-50 transition-all duration-300 bottom-0 left-0 w-full h-20 flex flex-row items-center justify-around px-4 md:h-[calc(100vh-40px)] md:w-64 md:rounded-lg md:m-5 md:flex-col md:justify-between md:py-8 md:top-0 md:bottom-auto print:hidden">
-        <div className="w-full md:w-auto flex flex-row md:flex-col items-center justify-around md:justify-start md:block">
-          {/* Brand */}
-          <div className="hidden md:flex px-8 mb-12 items-center justify-start">
-            <span className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">UDLA</span>
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex flex-col p-6"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <div className="flex justify-end mb-4">
+            <button className="text-white">
+              <span className="material-symbols-outlined">close</span>
+            </button>
           </div>
-          {/* Nav Links */}
-          <ul className="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-2 px-2 md:px-4 w-full md:w-auto justify-around md:justify-start">
-            {/* Dashboard */}
-            <li className="flex-1 md:flex-none">
+          <nav className="flex-grow space-y-1">
+            {navLinks.map((link) => (
               <Link
-                to="/estudiante"
-                className={`flex flex-col md:flex-row items-center justify-center md:justify-start space-y-1 md:space-y-0 md:space-x-4 px-2 md:px-4 py-2 md:py-3 transition-transform ${
-                  isActive('/estudiante')
-                    ? 'bg-primary/10 text-primary md:border-r-4 border-b-4 md:border-b-0 border-primary rounded-t-lg md:rounded-t-none md:rounded-l-full scale-100 md:scale-95'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/20 transition-all duration-300 rounded-lg md:rounded-full'
+                key={link.to}
+                to={link.to}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive(link.to)
+                    ? 'bg-primary/10 text-primary border border-primary/20'
+                    : 'text-on-surface/60 hover:text-on-surface hover:bg-white/5'
                 }`}
               >
-                <span className="material-symbols-outlined" style={isActive('/estudiante') ? { fontVariationSettings: "'FILL' 1" } : undefined}>dashboard</span>
-                <span className="font-label-caps text-[10px] md:text-label-caps block">Panel Principal</span>
+                <span
+                  className="material-symbols-outlined text-[20px]"
+                  style={isActive(link.to) ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                >
+                  {link.icon}
+                </span>
+                <span className={`text-sm ${isActive(link.to) ? 'font-bold' : 'font-semibold'}`}>{link.label}</span>
               </Link>
-            </li>
-            {/* Reports */}
-            <li className="flex-1 md:flex-none">
-              <Link
-                to="/estudiante/reportes"
-                className={`flex flex-col md:flex-row items-center justify-center md:justify-start space-y-1 md:space-y-0 md:space-x-4 px-2 md:px-4 py-2 md:py-3 transition-transform ${
-                  isActive('/estudiante/reportes')
-                    ? 'bg-primary/10 text-primary md:border-r-4 border-b-4 md:border-b-0 border-primary rounded-t-lg md:rounded-t-none md:rounded-l-full scale-100 md:scale-95'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/20 transition-all duration-300 rounded-lg md:rounded-full'
-                }`}
-              >
-                <span className="material-symbols-outlined" style={isActive('/estudiante/reportes') ? { fontVariationSettings: "'FILL' 1" } : undefined}>analytics</span>
-                <span className="font-label-caps text-[10px] md:text-label-caps block">Mis Reportes</span>
-              </Link>
-            </li>
-            {/* Profile Mobile */}
-            <li className="flex-1 flex md:hidden items-center justify-center">
-              <Link to="/estudiante/configuracion" className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs shadow-[0px_4px_10px_rgba(52,171,30,0.3)] cursor-pointer">
-                {userInitials}
-              </Link>
-            </li>
-          </ul>
+            ))}
+          </nav>
+          <div className="mt-auto pt-6 border-t border-white/10">
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-3 mt-4 px-4 py-2 text-red-400 hover:text-red-300 transition-colors w-full text-left bg-transparent border-none outline-none"
+            >
+              <span className="material-symbols-outlined text-[20px]">logout</span>
+              <span className="text-sm font-medium">Cerrar Sesión</span>
+            </button>
+          </div>
         </div>
- 
-        {/* Footer / Profile Desktop */}
-        <div className="hidden md:flex px-4 flex-col items-start md:px-8 space-y-6 w-full">
-          <ul className="flex flex-col space-y-2 w-full">
-            <li>
-              <Link 
-                to="/estudiante/ayuda" 
-                className={`flex items-center space-x-4 px-4 py-2 transition-all duration-300 rounded-full justify-start ${
-                  isActive('/estudiante/ayuda')
-                    ? 'bg-primary/10 text-primary font-semibold'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/20'
-                }`}
+      )}
+
+      {/* Desktop Sidebar (>= 1024px / lg) */}
+      <aside id="student-sidebar" className="hidden lg:flex flex-col w-64 h-full bg-black/40 backdrop-blur-2xl border-r border-white/10 z-20 flex-shrink-0 relative print:hidden">
+        <div className="mb-10">
+          <h1 className="text-2xl font-black text-primary tracking-tight">U-Amazonia</h1>
+          <p className="text-[10px] uppercase tracking-widest text-on-surface/40 font-bold">Portal Estudiante</p>
+        </div>
+        <nav className="flex-1 space-y-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                isActive(link.to)
+                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  : 'text-on-surface/60 hover:text-on-surface hover:bg-white/5'
+              }`}
+            >
+              <span
+                className="material-symbols-outlined text-[20px]"
+                style={isActive(link.to) ? { fontVariationSettings: "'FILL' 1" } : undefined}
               >
-                <span className="material-symbols-outlined" style={isActive('/estudiante/ayuda') ? { fontVariationSettings: "'FILL' 1" } : undefined}>help_outline</span>
-                <span className="font-label-caps text-label-caps block">Centro de Ayuda</span>
-              </Link>
-            </li>
-            <li>
-              <button onClick={handleSignOut} className="flex items-center space-x-4 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/20 transition-all duration-300 rounded-full justify-start w-full text-left bg-transparent border-none outline-none">
-                <span className="material-symbols-outlined">logout</span>
-                <span className="font-label-caps text-label-caps block">Cerrar Sesión</span>
-              </button>
-            </li>
-          </ul>
-          <Link to="/estudiante/configuracion" className="flex items-center space-x-3 bg-white/[0.03] border border-white/5 p-2 rounded-full w-full justify-start mt-4 cursor-pointer hover:bg-white/[0.08] hover:border-white/10 transition-all duration-300 -mx-2">
-            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shadow-[0px_4px_10px_rgba(52,171,30,0.3)]">
-              {userInitials}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-body-md text-xs font-semibold text-on-surface truncate">{userEmail || 'Estudiante'}</p>
+                {link.icon}
+              </span>
+              <span className={`text-sm ${isActive(link.to) ? 'font-bold' : 'font-semibold'}`}>{link.label}</span>
+            </Link>
+          ))}
+        </nav>
+        {/* Profile Card */}
+        <div className="mt-auto pt-6 border-t border-white/10">
+          <Link to="/estudiante/configuracion" className="flex items-center gap-3 p-2 bg-white/[0.03] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.08] hover:border-white/10 transition-all duration-300 -mx-2">
+            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm">{userInitials}</div>
+            <div className="flex-grow min-w-0">
+              <p className="text-sm font-bold truncate">{userEmail.split('@')[0] || 'Estudiante'}</p>
+              <span className="text-[10px] font-bold text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">ESTUDIANTE</span>
             </div>
           </Link>
+          <button onClick={handleSignOut} className="flex items-center gap-3 mt-4 px-4 py-2 text-red-400 hover:text-red-300 transition-colors w-full text-left bg-transparent border-none outline-none">
+            <span className="material-symbols-outlined text-[20px]">logout</span>
+            <span className="text-sm font-medium">Cerrar Sesión</span>
+          </button>
         </div>
-      </nav>
+      </aside>
 
-      {/* Main Canvas */}
-      <main className="w-full md:ml-[280px] print:ml-0 flex-1 min-h-screen relative z-10 overflow-hidden pb-24 md:pb-0 print:pb-0">
-        {/* TopAppBar */}
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full px-4 md:px-8 lg:pr-20 py-6 md:py-8 bg-transparent sticky top-0 z-40 gap-4 sm:gap-0 backdrop-blur-sm sm:backdrop-blur-none relative print:hidden">
-          <div>
-            <h1 className="font-headline-lg-mobile lg:font-headline-lg text-2xl sm:text-headline-lg-mobile lg:text-headline-lg font-bold text-on-background tracking-tight">
-              {isActive('/estudiante/configuracion') 
-                ? 'Configuración' 
-                : isActive('/estudiante/reportes')
-                ? 'Mis Reportes'
-                : isActive('/estudiante/ayuda')
-                ? 'Centro de Ayuda'
-                : 'Panel Principal'}
-            </h1>
+      {/* Contenedor Derecho (Topbar + Contenido) */}
+      <div className="flex-1 flex flex-col h-full relative z-10 overflow-hidden">
+        {/* Mobile Header (< 1024px / lg) */}
+        <header id="student-topbar" className="flex lg:hidden h-16 w-full items-center justify-between px-4 bg-black/40 backdrop-blur-2xl border-b border-white/10 shrink-0 print:hidden relative z-50">
+          <div className="flex items-center gap-2">
+            <span className="text-[#34AB1E] font-bold text-xl tracking-tight">U-Amazonia</span>
           </div>
-          <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-0 sm:space-x-6">
-            {/* Trailing Icons */}
-            <div className="flex space-x-4 text-on-surface-variant mr-4 sm:mr-0">
-              <button
-                ref={notifBtnRef}
-                className="hover:text-primary transition-colors relative"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsNotificationsOpen((prev) => !prev);
-                }}
-                aria-expanded={isNotificationsOpen}
-                aria-haspopup="true"
-                aria-label="Notifications"
-              >
-                <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-container rounded-full" />
-              </button>
-            </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsNotificationsOpen(!isNotificationsOpen);
+              }}
+              className="notif-btn p-2 text-zinc-400 hover:text-white relative flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+            >
+              <span className="material-symbols-outlined">notifications</span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#34AB1E] rounded-full animate-pulse" />
+            </button>
+            <button
+              className="p-2 text-zinc-400 hover:text-white flex items-center justify-center"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+            </button>
           </div>
+          {/* Mobile Notifications Popover */}
+          <NotificationsPopover
+            isOpen={isNotificationsOpen}
+            onClose={() => setIsNotificationsOpen(false)}
+            role="estudiante"
+          />
+        </header>
 
-          {/* Notifications Popover */}
+        {/* Desktop Topbar */}
+        <header className="hidden lg:flex h-16 flex-shrink-0 bg-black/40 backdrop-blur-2xl border-b border-white/10 flex items-center justify-between px-4 lg:px-8 z-20 print:hidden">
+          <h1 className="font-bold text-lg text-white">
+            {isActive('/estudiante/configuracion') 
+              ? 'Configuración' 
+              : isActive('/estudiante/reportes')
+              ? 'Mis Reportes'
+              : isActive('/estudiante/ayuda')
+              ? 'Centro de Ayuda'
+              : 'Panel Principal'}
+          </h1>
+          <div className="flex-grow" />
+          <button
+            ref={notifBtnRef}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsNotificationsOpen(!isNotificationsOpen);
+            }}
+            className="notif-btn p-2 text-zinc-400 hover:text-white relative flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+          >
+            <span className="material-symbols-outlined">notifications</span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#34AB1E] rounded-full animate-pulse" />
+          </button>
+          {/* Desktop Notifications Popover */}
           <NotificationsPopover
             isOpen={isNotificationsOpen}
             onClose={() => setIsNotificationsOpen(false)}
@@ -202,9 +241,11 @@ export default function StudentLayout() {
           />
         </header>
 
-        {/* Dynamic Page Content */}
-        <Outlet />
-      </main>
+        {/* Área de Scroll Interno */}
+        <main className="flex-1 overflow-y-auto overscroll-contain p-4 md:p-8 z-10 relative">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

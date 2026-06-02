@@ -176,11 +176,11 @@ export default function NewReportDrawer({ isOpen, onClose }) {
 
       {/* The Drawer Panel */}
       <aside
-        className="drawer-slide-in h-screen w-full md:max-w-[600px] bg-black/60 backdrop-blur-2xl border-l border-white/10 md:rounded-tl-[40px] md:rounded-bl-[40px] shadow-[0px_20px_50px_rgba(0,0,0,0.5)] flex flex-col relative z-30 text-white"
+        className="drawer-slide-in h-[100dvh] w-full md:max-w-[600px] bg-zinc-900/95 backdrop-blur-3xl border-l border-white/10 md:rounded-tl-[40px] md:rounded-bl-[40px] shadow-[0px_20px_50px_rgba(0,0,0,0.5)] flex flex-col relative z-30 text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <header className="flex items-center justify-between px-6 md:px-10 py-6 md:py-8 border-b border-white/10">
+        <header className="flex-shrink-0 z-20 flex items-center justify-between px-6 md:px-10 py-6 md:py-8 border-b border-white/10">
           <h2 className="font-headline-md text-headline-md text-white">Nuevo Reporte</h2>
           <button className="p-2 rounded-full hover:bg-white/10 transition-colors group" onClick={onClose}>
             <span
@@ -193,7 +193,7 @@ export default function NewReportDrawer({ isOpen, onClose }) {
         </header>
 
         {/* Scrollable Content Canvas */}
-        <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6 md:py-8 space-y-8 md:space-y-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar p-4 md:p-6 space-y-8 md:space-y-10">
           {/* Section 1: Tipo de Incidente */}
           <section className="space-y-4">
             <h3 className="font-label-caps text-label-caps text-primary-container">Categoría</h3>
@@ -314,7 +314,7 @@ export default function NewReportDrawer({ isOpen, onClose }) {
         </div>
 
         {/* Footer Actions */}
-        <footer className="px-6 md:px-10 py-6 md:py-8 bg-black/40 border-t border-white/10 flex flex-col items-center gap-4">
+        <footer className="flex-shrink-0 p-4 md:p-6 border-t border-white/10 bg-zinc-900/80 pb-8 md:pb-6 z-20 mt-auto flex flex-col items-center gap-4">
           <button
             onClick={handleSubmit}
             className="w-full bg-primary-container hover:bg-[#2e991a] text-white font-headline-md text-[18px] leading-[24px] rounded-full py-4 shadow-[0px_10px_30px_rgba(52,171,30,0.4)] hover:shadow-[0px_15px_40px_rgba(52,171,30,0.6)] transform hover:-translate-y-1 transition-all duration-300"

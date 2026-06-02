@@ -45,7 +45,7 @@ export default function Grouping() {
     switch (status) {
       case 'Resuelto':
         return 'bg-green-500/20 text-green-400 border border-green-500/30';
-      case 'En Proceso':
+      case 'En proceso':
         return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
       case 'Reportado':
       default:
@@ -292,7 +292,7 @@ export default function Grouping() {
                           className={`inline-flex items-center px-3 py-1.5 rounded-full text-[12px] font-semibold ${getStatusSelectStyle(inc.status || inc.estado)} outline-none cursor-pointer`}
                         >
                           <option className="bg-black text-white" value="Reportado">Reportado</option>
-                          <option className="bg-black text-white" value="En Proceso">En Proceso</option>
+                          <option className="bg-black text-white" value="En proceso">En Proceso</option>
                           <option className="bg-black text-white" value="Resuelto">Resuelto</option>
                         </select>
                       </td>
@@ -360,7 +360,7 @@ export default function Grouping() {
                         className={`w-full bg-black/40 border border-white/10 text-white rounded-lg py-2.5 px-3 text-sm outline-none cursor-pointer`}
                       >
                         <option className="bg-black text-white" value="Reportado">Reportado</option>
-                        <option className="bg-black text-white" value="En Proceso">En Proceso</option>
+                        <option className="bg-black text-white" value="En proceso">En Proceso</option>
                         <option className="bg-black text-white" value="Resuelto">Resuelto</option>
                       </select>
                     </div>

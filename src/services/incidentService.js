@@ -39,9 +39,9 @@ export async function fetchIncidentes() {
       }
     ];
 
-    if (item.estado === 'En Proceso' || item.estado === 'Resuelto') {
+    if (item.estado === 'En proceso' || item.estado === 'Resuelto') {
       historial.push({
-        estado: 'En Proceso',
+        estado: 'En proceso',
         fecha: item.fecha_creacion,
         actor: 'Administrador'
       });
@@ -198,5 +198,55 @@ export async function eliminarIncidente(id) {
   }
 
   return data ? data[0] : null;
+}
+
+export async function obtenerNotificaciones(rol, usuario_id) {
+  let query = supabase.from('incidentes').select('*');
+
+  if (rol === 'admin') {
+    query = query
+      .eq('estado', 'Reportado')
+      .order('fecha_creacion', { ascending: false })
+      .limit(5);
+  } else {
+    query = query
+      .eq('usuario_id', usuario_id || '')
+      .neq('estado', 'Reportado')
+      .order('fecha_creacion', { ascending: false })
+      .limit(5);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching notifications from Supabase:', error);
+    throw error;
+  }
+
+  return (data || []).map((item) => {
+    if (rol === 'admin') {
+      return {
+        id: item.id,
+        titulo: 'Nuevo Incidente',
+        title: 'Nuevo Incidente',
+        mensaje: 'Se ha reportado un problema de ' + (item.tipo || 'Infraestructura'),
+        message: 'Se ha reportado un problema de ' + (item.tipo || 'Infraestructura'),
+        fecha: item.fecha_creacion,
+        leido: false,
+        leida: false
+      };
+    } else {
+      return {
+        id: item.id,
+        titulo: 'Actualización de Estado',
+        title: 'Actualización de Estado',
+        mensaje: 'Tu reporte de ' + (item.tipo || 'Infraestructura') + ' ahora está ' + (item.estado || 'Reportado'),
+        message: 'Tu reporte de ' + (item.tipo || 'Infraestructura') + ' ahora está ' + (item.estado || 'Reportado'),
+        fecha: item.fecha_creacion,
+        leido: false,
+        leida: false
+      };
+    }
+  });
 }
 

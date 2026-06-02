@@ -39,145 +39,152 @@ export default function IncidentDetailDrawer({ isOpen, onClose, incident }) {
   };
 
   const statusColor = {
-    'En Proceso': { bg: 'bg-[#E3F2FD]', text: 'text-blue-800', dot: 'bg-blue-500', glow: 'shadow-[0_0_8px_rgba(59,130,246,0.8)]' },
+    'En proceso': { bg: 'bg-[#E3F2FD]', text: 'text-blue-800', dot: 'bg-blue-500', glow: 'shadow-[0_0_8px_rgba(59,130,246,0.8)]' },
     'Reportado': { bg: 'bg-orange-100', text: 'text-orange-800', dot: 'bg-orange-500', glow: 'shadow-[0_0_8px_rgba(249,115,22,0.8)]' },
     'Resuelto': { bg: 'bg-green-100', text: 'text-green-800', dot: 'bg-green-500', glow: 'shadow-[0_0_8px_rgba(34,197,94,0.8)]' },
   };
 
-  const status = statusColor[incident.status] || statusColor['En Proceso'];
+  const status = statusColor[incident.status] || statusColor['En proceso'];
 
   return (
     <>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center print:fixed print:inset-0 print:z-[9999] print:bg-white print:block print:p-0" onClick={onClose}>
-        {/* Background overlay */}
-        <div className="fixed inset-0 z-0 bg-black/40 backdrop-blur-2xl print:hidden" />
+      <div 
+        className="fixed inset-0 z-[60] flex justify-end print:absolute print:inset-0 print:block" 
+        onClick={onClose}
+        style={{ animation: 'fadeIn 0.3s ease-out forwards' }}
+      >
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm print:hidden" onClick={onClose} />
 
-        {/* Mobile TopAppBar */}
-        <header className="bg-black/60 backdrop-blur-3xl shadow-none fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-20 md:hidden print:hidden border-b border-white/10">
-          <button onClick={onClose}>
-            <span className="material-symbols-outlined text-primary text-2xl">arrow_back</span>
-          </button>
-          <span className="font-headline-md text-headline-md font-bold text-primary text-xl">Detalle de Incidente</span>
-          <span className="material-symbols-outlined text-primary text-2xl">more_vert</span>
-        </header>
-
-        {/* Floating Card */}
-        <div
-          className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-xl shadow-glow overflow-hidden flex flex-col md:flex-row w-full max-w-5xl mt-20 md:mt-0 relative z-10 mx-4 print:mx-0 print:mt-0 print:bg-white print:text-black print:flex-col print:border-none print:relative print:top-0 print:left-0 print:w-full print:h-auto print:overflow-visible print:shadow-none print:translate-x-0 print:transform-none text-white"
+        {/* Drawer Container */}
+        <section
+          className="drawer-slide-in w-full max-w-[600px] h-[100dvh] flex flex-col bg-zinc-900/95 backdrop-blur-3xl border-l border-white/10 overflow-hidden relative z-10 print:relative print:w-full print:h-auto print:overflow-visible print:shadow-none print:border-none print:translate-x-0 print:transform-none print:bg-white print:text-black print:p-0 text-white"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Left Side: Evidence Image */}
-          <div className="w-full md:w-[40%] relative min-h-[300px] md:min-h-[600px] print:min-h-[300px] print:w-full print:h-auto print:relative">
-            <img
-              alt="Evidencia del incidente"
-              className="absolute inset-0 w-full h-full object-cover print:relative print:w-full print:h-auto print:max-h-64 print:object-contain print:break-inside-avoid"
-              src={incident.image}
-            />
-            <button 
-              onClick={() => setIsZoomed(true)}
-              className="absolute top-4 right-4 bg-black/40 backdrop-blur-md rounded-full p-2 hover:bg-black/60 transition-colors print:hidden"
-            >
-              <span className="material-symbols-outlined text-white">open_in_full</span>
-            </button>
-          </div>
-
-          {/* Right Side: Data */}
-          <div className="w-full md:w-[60%] p-8 md:p-12 flex flex-col text-surface-container-lowest print:p-6 print:text-black print:w-full print:bg-white">
-            {/* Top Row Info */}
-            <div className="flex justify-between items-center mb-6">
+          {/* Header (Fijo) */}
+          <header className="flex-shrink-0 z-20 px-6 py-6 border-b border-white/10 flex items-center justify-between print:bg-white print:text-black print:border-none">
+            <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <span className="font-label-caps text-label-caps text-on-surface-variant tracking-wider print:text-black">{incident.id}</span>
-                <div className={`flex items-center gap-2 ${status.bg} px-3 py-1 rounded-full`}>
-                  <div className={`w-2 h-2 rounded-full ${status.dot} ${status.glow} animate-pulse print:animate-none`} />
-                  <span className={`text-xs font-semibold ${status.text}`}>{incident.status}</span>
-                </div>
+                <span className="bg-primary/20 text-primary font-label-caps text-[10px] px-3 py-1 rounded-full uppercase tracking-widest print:border print:border-primary">
+                  {incident.category || incident.categoria || 'INCIDENTE'}
+                </span>
+                <span className="text-zinc-400 font-body-md text-sm print:text-black">{incident.id}</span>
               </div>
-              <button
-                className="hidden md:block text-on-surface-variant hover:text-error transition-colors print:hidden"
-                onClick={onClose}
+              <h2 className="font-headline-md text-headline-md text-white leading-tight print:text-black">
+                {incident.title}
+              </h2>
+            </div>
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 print:hidden hide-on-print animate-fade-in"
+              onClick={onClose}
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </header>
+
+          {/* Cuerpo del Contenido (Zona de Scroll) */}
+          <div className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar p-4 md:p-6 space-y-10 print:overflow-visible print:max-h-none print:p-0 print:space-y-6">
+            {/* Evidence Image */}
+            <div className="relative group rounded-xl overflow-hidden border border-white/10 aspect-video bg-black/40 print:border-none print:rounded-none">
+              <img
+                alt="Evidencia del incidente"
+                className="w-full h-full object-cover print:max-h-64 print:object-contain print:break-inside-avoid"
+                src={incident.image}
+              />
+              <button 
+                onClick={() => setIsZoomed(true)}
+                className="absolute top-4 right-4 bg-black/40 backdrop-blur-md rounded-full p-2 hover:bg-black/60 transition-colors print:hidden"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined text-white">open_in_full</span>
               </button>
             </div>
 
-            {/* Header */}
-            <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-4 print:text-black">
-              {incident.title}
-            </h2>
-
-            {/* Location */}
-            <div className="flex items-start gap-3 mb-8">
-              <span className="material-symbols-outlined text-primary mt-1 print:text-[#34AB1E]">location_on</span>
-              <div>
-                <p className="font-body-lg text-body-lg text-white print:text-black">{incident.location}</p>
-                <p className="text-sm text-zinc-300 print:text-black/70">Coordenadas: {incident.coordinates}</p>
+            {/* Metadata Grid */}
+            <div className="grid grid-cols-2 gap-y-8 gap-x-4 print:grid-cols-2 print:gap-4 print:text-black">
+              <div className="space-y-1">
+                <p className="font-label-caps text-primary uppercase text-[10px] tracking-widest">Ubicación</p>
+                <p className="font-body-md text-white print:text-black">{incident.location}</p>
+                <p className="text-xs text-zinc-400">Coordenadas: {incident.coordinates}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="font-label-caps text-primary uppercase text-[10px] tracking-widest">Estado</p>
+                <div className="pt-1">
+                  <div className={`inline-flex items-center gap-2 ${status.bg} px-3 py-1 rounded-full`}>
+                    <div className={`w-2 h-2 rounded-full ${status.dot} ${status.glow} animate-pulse print:animate-none`} />
+                    <span className={`text-xs font-semibold ${status.text}`}>{incident.status}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Description */}
-            <p className="font-body-md text-body-md text-zinc-350 mb-10 leading-relaxed print:text-black/90">
-              {incident.description}
-            </p>
+            <div className="space-y-4 print:text-black">
+              <p className="font-label-caps text-primary uppercase text-[10px] tracking-widest">Detalle del Incidente</p>
+              <p className="font-body-lg text-white leading-relaxed opacity-90 print:text-black">
+                {incident.description}
+              </p>
+            </div>
 
             {/* Timeline */}
-            <div className="mb-12 relative print:overflow-visible print:max-h-none">
-              <div className="absolute left-3 top-2 bottom-2 w-0.5 bg-gray-200" />
-              {(incident.historial || [
-                { estado: 'Reportado', fecha: incident.date, actor: 'Estudiante' }
-              ]).map((hist, idx) => {
-                const formatHistDate = (dateStr) => {
-                  try {
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return dateStr;
-                    return d.toLocaleString('es-ES');
-                  } catch (e) {
-                    return dateStr;
-                  }
-                };
+            <div className="space-y-8 pb-10 print:text-black">
+              <p className="font-label-caps text-primary uppercase text-[10px] tracking-widest">Historial de Trazabilidad</p>
+              <div className="relative space-y-8 ml-3">
+                {/* Timeline Line */}
+                <div className="absolute left-[3px] top-2 bottom-2 w-[2px] bg-white/10 print:bg-zinc-200" />
+                {(incident.historial || [
+                  { estado: 'Reportado', fecha: incident.date, actor: 'Estudiante' }
+                ]).map((hist, idx) => {
+                  const formatHistDate = (dateStr) => {
+                    try {
+                      const d = new Date(dateStr);
+                      if (isNaN(d.getTime())) return dateStr;
+                      return d.toLocaleString('es-ES');
+                    } catch (e) {
+                      return dateStr;
+                    }
+                  };
 
-                return (
-                  <div key={idx} className="flex items-center gap-6 mb-6 relative z-10">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                      hist.estado === 'Resuelto' 
-                        ? 'bg-green-500 text-white' 
-                        : hist.estado === 'En Proceso' 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-primary-container text-white print:bg-[#34AB1E]'
-                    }`}>
-                      <div className="w-2 h-2 bg-white rounded-full" />
+                  return (
+                    <div key={idx} className="relative flex gap-4 items-start z-10">
+                      <div className={`w-2.5 h-2.5 rounded-full mt-2 shrink-0 ${
+                        hist.estado === 'Resuelto' 
+                          ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' 
+                          : hist.estado === 'En proceso' 
+                          ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]' 
+                          : 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]'
+                      } print:shadow-none`} />
+                      <div className="space-y-1">
+                        <p className="font-body-md font-semibold text-white print:text-black">{hist.estado}</p>
+                        <p className="font-label-caps text-[10px] text-zinc-400 print:text-zinc-500">
+                          {formatHistDate(hist.fecha)} <span className="text-xs text-zinc-500 ml-2 font-normal">({hist.actor || 'Estudiante'})</span>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-white print:text-black">{hist.estado}</p>
-                      <p className="text-sm text-zinc-350 print:text-black/70">
-                        {formatHistDate(hist.fecha)}
-                        <span className="text-xs text-zinc-500 ml-2">({hist.actor || 'Estudiante'})</span>
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Action Button */}
-            <div className="mt-auto flex justify-end gap-3 print:hidden">
-              {incident.status === 'Reportado' && (
-                <button
-                  onClick={handleCancelReport}
-                  className="px-6 py-3 rounded-full border border-red-500 text-red-500 hover:bg-red-500/10 transition-colors font-semibold text-sm"
-                >
-                  Cancelar Reporte
-                </button>
-              )}
-              <button
-                onClick={() => window.print()}
-                className="px-6 py-3 rounded-full border-2 border-primary text-primary font-semibold hover:bg-primary/5 transition-colors flex items-center gap-2"
-              >
-                <span className="material-symbols-outlined">download</span>
-                Descargar PDF
-              </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Footer de Botones Fijo */}
+          <footer className="flex-shrink-0 p-4 md:p-6 border-t border-white/10 bg-zinc-900/80 pb-8 md:pb-6 z-20 mt-auto flex justify-end gap-3 print:hidden">
+            {incident.status === 'Reportado' && (
+              <button
+                onClick={handleCancelReport}
+                className="px-6 py-3 rounded-full border border-red-500 text-red-500 hover:bg-red-500/10 transition-colors font-semibold text-sm"
+              >
+                Cancelar Reporte
+              </button>
+            )}
+            <button
+              onClick={() => window.print()}
+              className="px-6 py-3 rounded-full border-2 border-primary text-primary font-semibold hover:bg-primary/5 transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined">download</span>
+              Descargar PDF
+            </button>
+          </footer>
+        </section>
       </div>
 
       {/* Zoom overlay */}

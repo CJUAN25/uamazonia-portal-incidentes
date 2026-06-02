@@ -7,7 +7,7 @@ const FAQS = [
   },
   {
     question: '¿Qué significan los estados de mis reportes?',
-    answer: 'Tus reportes pueden tener tres estados: 1) "Reportado" cuando ha sido enviado y está en cola de revisión, 2) "En Proceso" cuando ha sido asignado al equipo técnico y se está trabajando en su solución, y 3) "Resuelto" una vez que el problema ha sido subsanado por completo.'
+    answer: 'Tus reportes pueden tener tres estados: 1) "Reportado" cuando ha sido enviado y está en cola de revisión, 2) "En proceso" cuando ha sido asignado al equipo técnico y se está trabajando en su solución, y 3) "Resuelto" una vez que el problema ha sido subsanado por completo.'
   },
   {
     question: '¿Cuánto tiempo toma solucionar un reporte?',

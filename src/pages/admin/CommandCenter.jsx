@@ -41,7 +41,7 @@ export default function CommandCenter() {
     switch (status) {
       case 'Resuelto':
         return 'bg-green-500/20 text-green-400 border border-green-500/30';
-      case 'En Proceso':
+      case 'En proceso':
         return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
       case 'Reportado':
       default:
@@ -92,7 +92,7 @@ export default function CommandCenter() {
 
   const isStagnant = (inc) => {
     const statusVal = inc.status || inc.estado;
-    if (statusVal !== 'En Proceso' && statusVal !== 'Reportado') return false;
+    if (statusVal !== 'En proceso' && statusVal !== 'Reportado') return false;
     const incDate = parseIncidentDate(inc.date);
     const diffTime = Math.abs(new Date() - incDate);
     const diffHours = diffTime / (1000 * 60 * 60);
@@ -101,7 +101,7 @@ export default function CommandCenter() {
 
   const total = incidentes.length;
   const nuevos = incidentes.filter(i => (i.status || i.estado) === 'Reportado').length;
-  const enProceso = incidentes.filter(i => (i.status || i.estado) === 'En Proceso').length;
+  const enProceso = incidentes.filter(i => (i.status || i.estado) === 'En proceso').length;
   const resueltos = incidentes.filter(i => (i.status || i.estado) === 'Resuelto').length;
   const estancados = incidentes.filter(i => isStagnant(i)).length;
 
@@ -256,7 +256,7 @@ export default function CommandCenter() {
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-[12px] font-semibold ${getStatusSelectStyle(inc.status || inc.estado)} outline-none cursor-pointer print:bg-white print:text-black print:border print:border-zinc-300`}
                       >
                         <option className="bg-black text-white print:bg-white print:text-black" value="Reportado">Reportado</option>
-                        <option className="bg-black text-white print:bg-white print:text-black" value="En Proceso">En Proceso</option>
+                        <option className="bg-black text-white print:bg-white print:text-black" value="En proceso">En Proceso</option>
                         <option className="bg-black text-white print:bg-white print:text-black" value="Resuelto">Resuelto</option>
                       </select>
                     </td>
