@@ -13,6 +13,16 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Garantía de carga limpia: forzar reset de inputs al montar el componente.
+  // Previene state leaking de sesiones anteriores o autorrelleno del navegador.
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setFullName('');
+    setSemester('');
+    setIsRegistering(false);
+  }, []);
+
   const redirectUser = (userEmail) => {
     const isEmailAdmin = userEmail.toLowerCase().includes('admin');
     if (isEmailAdmin) {

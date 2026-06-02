@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import NotificationsPopover from '../components/NotificationsPopover';
 
 export default function StudentLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const notifBtnRef = useRef(null);
@@ -35,14 +33,20 @@ export default function StudentLayout() {
 
   const handleSignOut = async (e) => {
     if (e) e.preventDefault();
-    const toastId = toast.loading('Cerrando sesión...');
     try {
+      // 1. Cerrar sesión en el backend
       await supabase.auth.signOut();
-      toast.success('Sesión cerrada correctamente', { id: toastId });
-      navigate('/');
-    } catch (err) {
-      console.error(err);
-      toast.error('Error al cerrar sesión', { id: toastId });
+      // 2. Destruir toda la memoria local y de sesión del navegador
+      localStorage.clear();
+      sessionStorage.clear();
+      // 3. Destruir el árbol de React y forzar recarga limpia hacia el login
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+      // En caso de error, igualmente forzar la salida limpia
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/';
     }
   };
 
