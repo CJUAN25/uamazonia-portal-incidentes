@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import AdminIncidentDrawer from '../../components/AdminIncidentDrawer';
-import { fetchIncidentes, actualizarEstado } from '../../services/incidentService';
+import { fetchIncidentes, actualizarEstado, agruparIncidentes } from '../../services/incidentService';
+import { formatearID } from '../../lib/utils';
 
 export default function Grouping() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -119,35 +120,26 @@ export default function Grouping() {
 
   const isAllSelected = filtered.length > 0 && selectedIds.length === filtered.length;
 
-  const handleApplyGroup = () => {
-    if (selectedIds.length === 0) {
-      toast.error('Selecciona al menos un incidente');
-      return;
-    }
-    if (!groupName.trim()) {
-      toast.error('Escribe un nombre para el grupo');
+  const handleApplyGroup = async () => {
+    if (selectedIds.length < 2) {
+      toast.error('Selecciona al menos dos incidentes para agrupar');
       return;
     }
 
-    const generatedGroupId = `GRP-${Math.floor(Math.random() * 1000)}`;
-
+    const toastId = toast.loading('Vinculando incidentes en Supabase...');
     try {
-      const localGroups = JSON.parse(localStorage.getItem('incidentes_grupos')) || {};
-      selectedIds.forEach(id => {
-        localGroups[id] = {
-          groupId: generatedGroupId,
-          groupName: groupName
-        };
-      });
-      localStorage.setItem('incidentes_grupos', JSON.stringify(localGroups));
-      
+      const incidentePrincipalId = selectedIds[0];
+      const incidentesSecundariosIds = selectedIds.slice(1);
+
+      await agruparIncidentes(incidentePrincipalId, incidentesSecundariosIds);
+
       setGroupName('');
       setSelectedIds([]);
       window.dispatchEvent(new Event('reporteActualizado'));
-      toast.success('Incidentes vinculados correctamente');
+      toast.success('Incidentes vinculados correctamente', { id: toastId });
     } catch (err) {
       console.error(err);
-      toast.error('Error al vincular incidentes');
+      toast.error('Error al vincular incidentes', { id: toastId });
     }
   };
 
@@ -261,7 +253,7 @@ export default function Grouping() {
                 <tbody className="divide-y divide-white/10">
                   {filtered.map(inc => (
                     <tr 
-                      key={inc.id} 
+                      key={formatearID(inc.id)} 
                       className="hover:bg-white/5 transition-colors cursor-pointer"
                       onClick={() => handleOpenDrawer(inc)}
                     >
@@ -326,7 +318,7 @@ export default function Grouping() {
                         />
                       </div>
                       <div>
-                        <h3 className="font-bold text-primary text-lg">{inc.id}</h3>
+                        <h3 className="font-bold text-primary text-lg">{formatearID(inc.id)}</h3>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase">
                           {inc.groupId || inc.grupoId ? `Grupo: ${inc.groupId || inc.grupoId}` : 'Sin Grupo'}
                         </p>

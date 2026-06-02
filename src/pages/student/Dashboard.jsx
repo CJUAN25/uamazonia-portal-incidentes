@@ -3,6 +3,7 @@ import NewReportDrawer from '../../components/NewReportDrawer';
 import IncidentDetailDrawer from '../../components/IncidentDetailDrawer';
 import { fetchIncidentes } from '../../services/incidentService';
 import { toast } from 'react-hot-toast';
+import { formatearID } from '../../lib/utils';
 
 export default function Dashboard() {
   const [isNewReportOpen, setIsNewReportOpen] = useState(false);

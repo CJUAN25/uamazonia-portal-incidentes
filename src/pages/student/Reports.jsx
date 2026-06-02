@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import IncidentDetailDrawer from '../../components/IncidentDetailDrawer';
 import { fetchIncidentes } from '../../services/incidentService';
+import { formatearID } from '../../lib/utils';
 
 export default function Reports() {
   const [selectedIncident, setSelectedIncident] = useState(null);
@@ -13,12 +14,7 @@ export default function Reports() {
     try {
       setLoading(true);
       const data = await fetchIncidentes();
-      const currentUserStr = localStorage.getItem('currentUser');
-      const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
-      const userEmail = currentUser?.email || 'estudiante_anonimo';
-
-      const filtered = data.filter((inc) => inc.usuario_id === userEmail);
-      setIncidentes(filtered);
+      setIncidentes(data);
     } catch (err) {
       console.error('Error fetching student reports:', err);
     } finally {
@@ -88,11 +84,11 @@ export default function Reports() {
             <tbody className="divide-y divide-outline-variant/20 text-on-surface text-sm">
               {incidentes.map((report) => (
                 <tr 
-                  key={report.id} 
+                  key={formatearID(report.id)} 
                   className="hover:bg-surface-variant/20 transition-colors cursor-pointer"
                   onClick={() => handleOpenDetail(report)}
                 >
-                  <td className="p-4 pl-6 font-semibold">{report.id}</td>
+                  <td className="p-4 pl-6 font-semibold">{formatearID(report.id)}</td>
                   <td className="p-4">
                     <div className="flex items-center space-x-2">
                       <span className="material-symbols-outlined text-[18px] text-primary-container">{report.categoryIcon}</span>
@@ -118,12 +114,12 @@ export default function Reports() {
         <div className="block md:hidden flex flex-col gap-4 p-4">
           {!loading && incidentes.map((report) => (
             <div 
-              key={report.id} 
+              key={formatearID(report.id)} 
               className="p-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl hover:bg-white/[0.06] transition-colors cursor-pointer space-y-3"
               onClick={() => handleOpenDetail(report)}
             >
               <div className="flex justify-between items-center">
-                <span className="font-semibold text-xs text-on-surface-variant">{report.id}</span>
+                <span className="font-semibold text-xs text-on-surface-variant">{formatearID(report.id)}</span>
                 {getStatusBadge(report.status)}
               </div>
               <div>

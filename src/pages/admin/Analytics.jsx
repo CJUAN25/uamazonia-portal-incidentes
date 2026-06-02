@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchIncidentes } from '../../services/incidentService';
+import { formatearID } from '../../lib/utils';
 
 export default function Analytics() {
   const [incidentes, setIncidentes] = useState([]);

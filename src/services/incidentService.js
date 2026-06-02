@@ -12,18 +12,29 @@ function base64ToBlob(base64, mime) {
 }
 
 export async function fetchIncidentes() {
-  const { data, error } = await supabase
-    .from('incidentes')
-    .select('*')
-    .order('fecha_creacion', { ascending: false });
+  // Resolve auth session internally — no parameters accepted
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('No autenticado');
+
+  // Role detection: admin if email contains 'admin'
+  const isAdmin = user.email.includes('admin');
+
+  let query = supabase.from('incidentes').select('*');
+
+  if (isAdmin) {
+    // Admins see all incidents
+    query = query.order('fecha_creacion', { ascending: false });
+  } else {
+    // Students only see their own incidents — filtered by UUID user.id
+    query = query.eq('usuario_id', user.id).order('fecha_creacion', { ascending: false });
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching incidentes from Supabase:', error);
     throw error;
   }
-
-  // Load grouping metadata from localStorage
-  const localGroups = JSON.parse(localStorage.getItem('incidentes_grupos')) || {};
 
   return data.map((item) => {
     const lat = item.latitud;
@@ -82,10 +93,10 @@ export async function fetchIncidentes() {
       description: item.descripcion || '',
       image: item.imagen_url || 'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=600&auto=format&fit=crop',
       historial: historial,
-      groupId: localGroups[item.id]?.groupId || null,
-      grupoId: localGroups[item.id]?.groupId || null,
-      groupName: localGroups[item.id]?.groupName || null,
-      grupoNombre: localGroups[item.id]?.groupName || null,
+      groupId: item.grupo_id || null,
+      grupoId: item.grupo_id || null,
+      groupName: item.grupo_id ? `Grupo #${item.grupo_id.substring(0, 8)}` : null,
+      grupoNombre: item.grupo_id ? `Grupo #${item.grupo_id.substring(0, 8)}` : null,
       usuario_id: item.usuario_id
     };
   });
@@ -127,6 +138,10 @@ export async function uploadEvidencia(fileOrBase64, fileName) {
 }
 
 export async function crearIncidente(datos) {
+  // Force real auth user.id — never trust frontend-supplied usuario_id
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('No autenticado');
+
   let latitud = null;
   let longitud = null;
   if (datos.coordinates && datos.coordinates !== 'No adjuntas') {
@@ -137,10 +152,13 @@ export async function crearIncidente(datos) {
     }
   }
 
+  // Overwrite any frontend-supplied usuario_id with the real auth UUID
+  datos.usuario_id = user.id;
+
   const { data, error } = await supabase
     .from('incidentes')
     .insert({
-      usuario_id: datos.usuario_id || 'estudiante_anonimo',
+      usuario_id: datos.usuario_id,
       tipo: datos.category || 'Infraestructura',
       descripcion: datos.description || '',
       imagen_url: datos.image || null,
@@ -184,17 +202,6 @@ export async function eliminarIncidente(id) {
   if (error) {
     console.error(`Error deleting incident ${id} from Supabase:`, error);
     throw error;
-  }
-
-  // Limpiar metadatos de grupos en localStorage si existen
-  try {
-    const localGroups = JSON.parse(localStorage.getItem('incidentes_grupos')) || {};
-    if (localGroups[id]) {
-      delete localGroups[id];
-      localStorage.setItem('incidentes_grupos', JSON.stringify(localGroups));
-    }
-  } catch (e) {
-    console.error('Error cleaning up local groups on delete:', e);
   }
 
   return data ? data[0] : null;
@@ -248,5 +255,24 @@ export async function obtenerNotificaciones(rol, usuario_id) {
       };
     }
   });
+}
+
+export async function agruparIncidentes(incidentePrincipalId, incidentesSecundariosIds) {
+  if (!incidentePrincipalId || !incidentesSecundariosIds || incidentesSecundariosIds.length === 0) {
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('incidentes')
+    .update({ grupo_id: incidentePrincipalId })
+    .in('id', incidentesSecundariosIds)
+    .select();
+
+  if (error) {
+    console.error('Error grouping incidents in Supabase:', error);
+    throw error;
+  }
+
+  return data;
 }
 

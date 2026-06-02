@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminIncidentDrawer from '../../components/AdminIncidentDrawer';
 import { fetchIncidentes, actualizarEstado } from '../../services/incidentService';
 import { toast } from 'react-hot-toast';
+import { formatearID } from '../../lib/utils';
 
 export default function CommandCenter() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -105,9 +106,13 @@ export default function CommandCenter() {
   const resueltos = incidentes.filter(i => (i.status || i.estado) === 'Resuelto').length;
   const estancados = incidentes.filter(i => isStagnant(i)).length;
 
-  // Real Percentage calculation
-  const resolvedPctVal = Math.round((resueltos / total) * 100) || 0;
-  const resolvedPct = `${resolvedPctVal}%`;
+  // Safe per-state percentages (NaN-proof)
+  const pctReportados = total === 0 ? 0 : Math.round((nuevos   / total) * 100);
+  const pctEnProceso  = total === 0 ? 0 : Math.round((enProceso / total) * 100);
+  const pctResueltos  = total === 0 ? 0 : Math.round((resueltos / total) * 100);
+
+  // Keep legacy resolvedPct for any other usage
+  const resolvedPct = `${pctResueltos}%`;
 
   // Extract unique categories dynamically and count occurrences
   const uniqueCategories = Array.from(
@@ -198,28 +203,114 @@ export default function CommandCenter() {
               )}
             </div>
           </div>
-          {/* Donut Chart (CSS) */}
+          {/* Donut Chart — 3-segment SVG */}
           <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl rounded-xl p-6 flex flex-col items-center justify-center">
             <h3 className="font-body-lg text-body-lg text-on-surface font-semibold mb-6 self-start w-full">Estado de reportes</h3>
-            <div className="relative w-48 h-48 mb-4">
-              <div className="absolute inset-0 rounded-full border-[16px] border-black/40" />
-              <div className="absolute inset-0 rounded-full border-[16px] border-primary" style={{ clipPath: 'polygon(50% 50%, 100% 0, 100% 100%, 0 100%, 0 0, 25% 0)', transform: 'rotate(0deg)' }} />
-              <div className="absolute inset-0 flex items-center justify-center flex-col">
-                <span className="font-headline-md text-headline-md text-on-surface">{resolvedPct}</span>
-                <span className="font-label-caps text-[10px] text-zinc-400 tracking-widest uppercase">Resueltos</span>
+
+            {/* SVG Donut — viewBox 36×36, r=15.9, circunferencia ≈ 100 */}
+            <div className="relative w-44 h-44 mb-6">
+              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                {/* Track (fondo) */}
+                <circle
+                  cx="18" cy="18" r="15.9"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="3.8"
+                />
+
+                {total === 0 ? (
+                  /* Estado vacío: anillo gris completo */
+                  <circle
+                    cx="18" cy="18" r="15.9"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.1)"
+                    strokeWidth="3.8"
+                    strokeDasharray="100 0"
+                    strokeDashoffset="25"
+                    strokeLinecap="butt"
+                  />
+                ) : (
+                  <>
+                    {/* Segmento 1 — Reportado (rose) */}
+                    {pctReportados > 0 && (
+                      <circle
+                        cx="18" cy="18" r="15.9"
+                        fill="none"
+                        stroke="#f43f5e"
+                        strokeWidth="3.8"
+                        strokeDasharray={`${pctReportados} ${100 - pctReportados}`}
+                        strokeDashoffset="25"
+                        strokeLinecap="butt"
+                        className="transition-all duration-700"
+                      />
+                    )}
+                    {/* Segmento 2 — En proceso (amber) */}
+                    {pctEnProceso > 0 && (
+                      <circle
+                        cx="18" cy="18" r="15.9"
+                        fill="none"
+                        stroke="#f59e0b"
+                        strokeWidth="3.8"
+                        strokeDasharray={`${pctEnProceso} ${100 - pctEnProceso}`}
+                        strokeDashoffset={100 - pctReportados + 25}
+                        strokeLinecap="butt"
+                        className="transition-all duration-700"
+                      />
+                    )}
+                    {/* Segmento 3 — Resuelto (emerald) */}
+                    {pctResueltos > 0 && (
+                      <circle
+                        cx="18" cy="18" r="15.9"
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="3.8"
+                        strokeDasharray={`${pctResueltos} ${100 - pctResueltos}`}
+                        strokeDashoffset={100 - pctReportados - pctEnProceso + 25}
+                        strokeLinecap="butt"
+                        className="transition-all duration-700"
+                      />
+                    )}
+                  </>
+                )}
+              </svg>
+
+              {/* Texto central */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+                <span className="font-headline-md text-headline-md text-on-surface leading-none">
+                  {total === 0 ? '—' : total}
+                </span>
+                <span className="font-label-caps text-[9px] text-zinc-400 tracking-widest uppercase">
+                  {total === 0 ? 'Sin datos' : 'Totales'}
+                </span>
               </div>
             </div>
-            <div className="flex space-x-4 w-full justify-center mt-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-primary" />
-                <span className="font-body-md text-[12px] text-zinc-400">Resuelto</span>
+
+            {/* Leyenda dinámica */}
+            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 w-full">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
+                <span className="font-body-md text-[12px] text-zinc-400">
+                  Reportado: <span className="text-white font-semibold">{nuevos}</span>
+                  <span className="text-zinc-500 ml-1">({pctReportados}%)</span>
+                </span>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-white/20" />
-                <span className="font-body-md text-[12px] text-zinc-400">Pendiente</span>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                <span className="font-body-md text-[12px] text-zinc-400">
+                  En proceso: <span className="text-white font-semibold">{enProceso}</span>
+                  <span className="text-zinc-500 ml-1">({pctEnProceso}%)</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                <span className="font-body-md text-[12px] text-zinc-400">
+                  Resuelto: <span className="text-white font-semibold">{resueltos}</span>
+                  <span className="text-zinc-500 ml-1">({pctResueltos}%)</span>
+                </span>
               </div>
             </div>
           </div>
+
         </div>
 
         {/* History Table */}
@@ -239,13 +330,13 @@ export default function CommandCenter() {
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface divide-y divide-white/10 print:text-black print:divide-zinc-200">
-                {incidentes.map((inc) => (
+                {incidentes.filter(inc => !inc.grupoId).map((inc) => (
                   <tr
-                    key={inc.id}
+                    key={formatearID(inc.id)}
                     className="hover:bg-white/5 transition-colors cursor-pointer print:hover:bg-transparent"
                     onClick={() => handleOpenDrawer(inc)}
                   >
-                    <td className="p-4 text-zinc-400 print:text-zinc-700">{inc.id}</td>
+                    <td className="p-4 text-zinc-400 print:text-zinc-700">{formatearID(inc.id)}</td>
                     <td className="p-4 font-medium print:text-black">{inc.category || inc.categoria}</td>
                     <td className="p-4 text-zinc-400 print:text-zinc-700">{inc.location || inc.ubicacion}</td>
                     <td className="p-4 text-zinc-400 print:text-zinc-700">{inc.date || inc.fecha}</td>
@@ -262,7 +353,7 @@ export default function CommandCenter() {
                     </td>
                   </tr>
                 ))}
-                {incidentes.length === 0 && (
+                {incidentes.filter(inc => !inc.grupoId).length === 0 && (
                   <tr>
                     <td colSpan="5" className="p-8 text-center text-zinc-500 print:text-zinc-650">No hay incidentes reportados en el sistema.</td>
                   </tr>

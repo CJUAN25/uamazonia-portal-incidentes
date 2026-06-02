@@ -1,6 +1,22 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import { toast } from 'react-hot-toast';
 
 export default function Settings() {
+  const [user, setUser] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Fetch authenticated user details
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) console.error('Error fetching user', error);
+      else setUser(data.user);
+    };
+    fetchUser();
+  }, []);
+
   const [toggleReports, setToggleReports] = useState(() => localStorage.getItem('studentAlerts') !== 'false');
   const [avatar, setAvatar] = useState(() => localStorage.getItem('userAvatar') || '');
 
@@ -31,6 +47,28 @@ export default function Settings() {
         window.dispatchEvent(new Event('userAvatarChanged'));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleActualizarContrasena = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast.success('Contraseña actualizada correctamente');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al actualizar la contraseña');
     }
   };
 
@@ -69,8 +107,12 @@ export default function Settings() {
               onChange={handleFileChange}
             />
             <div className="flex flex-col gap-1">
-              <h4 className="text-xl font-bold text-white">Juan Santiago</h4>
-              <span className="inline-flex items-center bg-white/5 text-zinc-300 text-xs font-semibold px-3 py-1 rounded-full w-fit border border-white/10">Estudiante - 7mo Semestre</span>
+              {user && (
+            <h4 className="text-xl font-bold text-white">{user.user_metadata?.full_name || user.email.split('@')[0]}</h4>
+          )}
+              {user && (
+            <span className="inline-flex items-center bg-white/5 text-zinc-300 text-xs font-semibold px-3 py-1 rounded-full w-fit border border-white/10">Estudiante - {user.user_metadata?.semestre || ''}</span>
+          )}
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -79,7 +121,7 @@ export default function Settings() {
               className="w-full bg-black/40 text-zinc-550 text-sm rounded-xl px-4 py-3 border border-white/10 cursor-not-allowed focus:outline-none"
               disabled
               type="email"
-              value="j.ceron@udla.edu.co"
+              value={user ? user.email : ''}
               readOnly
             />
           </div>
@@ -99,25 +141,32 @@ export default function Settings() {
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Nueva Contraseña</label>
-              <input
-                className="w-full bg-black/40 text-white text-sm rounded-xl px-4 py-3 border border-white/10 focus:ring-2 focus:ring-[#34AB1E] focus:border-transparent focus:outline-none transition-all placeholder-zinc-650"
-                placeholder="Mínimo 8 caracteres"
-                type="password"
-              />
+                <input
+                  className="w-full bg-black/40 text-white text-sm rounded-xl px-4 py-3 border border-white/10 focus:ring-2 focus:ring-[#34AB1E] focus:border-transparent focus:outline-none transition-all placeholder-zinc-650"
+                  placeholder="Mínimo 8 caracteres"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Confirmar Nueva Contraseña</label>
-              <input
-                className="w-full bg-black/40 text-white text-sm rounded-xl px-4 py-3 border border-white/10 focus:ring-2 focus:ring-[#34AB1E] focus:border-transparent focus:outline-none transition-all placeholder-zinc-650"
-                placeholder="Repite tu nueva contraseña"
-                type="password"
-              />
+                <input
+                  className="w-full bg-black/40 text-white text-sm rounded-xl px-4 py-3 border border-white/10 focus:ring-2 focus:ring-[#34AB1E] focus:border-transparent focus:outline-none transition-all placeholder-zinc-650"
+                  placeholder="Repite tu nueva contraseña"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
             </div>
           </div>
           <div className="flex justify-end pt-2">
-            <button className="bg-transparent border border-white/20 text-white hover:text-[#34AB1E] hover:border-[#34AB1E] text-sm font-semibold py-2.5 px-6 rounded-full transition-all duration-200">
-              Actualizar Contraseña
-            </button>
+                <button
+                  className="bg-transparent border border-white/20 text-white hover:text-[#34AB1E] hover:border-[#34AB1E] text-sm font-semibold py-2.5 px-6 rounded-full transition-all duration-200"
+                  onClick={handleActualizarContrasena}
+                >
+                  Actualizar Contraseña
+                </button>
           </div>
         </section>
 

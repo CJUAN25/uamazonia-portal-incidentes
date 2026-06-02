@@ -15,14 +15,19 @@ export default function AdminLayout() {
 
   const [userEmail, setUserEmail] = useState('');
   const [userInitials, setUserInitials] = useState('AD');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && user.email) {
-        setUserEmail(user.email);
-        const namePart = user.email.split('@')[0];
-        const initials = namePart.substring(0, 2).toUpperCase();
+      const { data, error } = await supabase.auth.getUser();
+      if (error) console.error('Error fetching user', error);
+      const userData = data?.user;
+      if (userData) {
+        setUser(userData);
+        setUserEmail(userData.email);
+        const fullName = userData.user_metadata?.full_name;
+        const nameForInitials = fullName || userData.email.split('@')[0];
+        const initials = nameForInitials.substring(0, 2).toUpperCase();
         setUserInitials(initials || 'AD');
       }
     };
@@ -123,6 +128,14 @@ export default function AdminLayout() {
               </Link>
             ))}
           </nav>
+            {/* Profile Access Link */}
+            <Link to="/admin/configuracion" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 p-2 bg-white/[0.03] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.08] hover:border-white/10 transition-all duration-300 -mx-2 mb-4">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">{userInitials}</div>
+              <div className="flex-grow min-w-0">
+                <p className="text-sm font-bold truncate">{userEmail.split('@')[0] || 'Administrador'}</p>
+                <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20">SUPER ADMIN</span>
+              </div>
+            </Link>
           <div className="mt-auto pt-6 border-t border-white/10">
             <button
               onClick={handleSignOut}

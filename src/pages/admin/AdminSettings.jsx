@@ -1,7 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import { toast } from 'react-hot-toast';
+import { formatearID } from '../../lib/utils';
 
 export default function AdminSettings() {
+  const [user, setUser] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+
+  // Fetch authenticated user details
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) console.error('Error fetching user', error);
+      else setUser(data.user);
+    };
+    fetchUser();
+  }, []);
   const [toggleNewIncidents, setToggleNewIncidents] = useState(() => localStorage.getItem('adminAlerts') !== 'false');
+
+  const handleActualizarContrasena = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast.success('Contraseña actualizada correctamente');
+      setNewPassword('');
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al actualizar la contraseña');
+    }
+  };
+
+  const handleGuardarPreferencias = () => {
+    toast.success('Preferencias guardadas');
+  };
 
   return (
     <div className="p-4 md:p-8 flex-1 overflow-y-auto flex justify-center">
@@ -10,19 +46,19 @@ export default function AdminSettings() {
         {/* Main Header */}
         <header className="mb-2">
           <h1 className="text-2xl md:text-3xl font-bold text-white">Configuración del Sistema</h1>
-          <p className="text-zinc-400 mt-1">Gestiona credenciales de acceso y parámetros de alertas globales (RF-14).</p>
+          <p className="text-zinc-400 mt-1">Gestiona credenciales de acceso y parámetros de alertas globales.</p>
         </header>
 
         {/* Admin Profile Card */}
         <section className="bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl rounded-xl p-4 md:p-6">
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#34AB1E] rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shrink-0">
-              JV
+                {user ? (user.user_metadata?.full_name ? user.user_metadata.full_name.split(' ')[0].substring(0,2).toUpperCase() : (user.email.split('@')[0].substring(0,2).toUpperCase())) : ''}
             </div>
             <div className="flex-1 w-full space-y-4">
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-xl font-bold">Juan Santiago</h2>
+                  <h2 className="text-xl font-bold">{user ? user.user_metadata?.full_name || user.email.split('@')[0] : ''}</h2>
                   <span className="bg-[#34AB1E]/10 text-[#34AB1E] text-[10px] font-bold px-2 py-0.5 rounded border border-[#34AB1E]/20 uppercase tracking-wider">Super Administrador</span>
                 </div>
               </div>
@@ -32,7 +68,7 @@ export default function AdminSettings() {
                   className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-zinc-400 cursor-not-allowed outline-none"
                   disabled
                   type="email"
-                  value="j.ceron@udla.edu.co"
+                  value={user ? user.email : ''}
                   readOnly
                 />
               </div>
@@ -61,19 +97,21 @@ export default function AdminSettings() {
                 className="w-full bg-black/40 border border-white/10 focus:border-[#34AB1E] rounded-lg px-4 py-2.5 text-white outline-none transition-colors"
                 placeholder="••••••••"
                 type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
               />
             </div>
           </div>
-          <button className="mt-6 sm:self-end bg-transparent border-2 border-[#34AB1E] text-[#34AB1E] hover:bg-[#34AB1E]/5 font-bold py-2.5 px-6 rounded-lg transition-all active:scale-95">
+          <button className="mt-6 sm:self-end bg-transparent border-2 border-[#34AB1E] text-[#34AB1E] hover:bg-[#34AB1E]/5 font-bold py-2.5 px-6 rounded-lg transition-all active:scale-95" onClick={handleActualizarContrasena}>
             Actualizar Credenciales
           </button>
         </section>
 
-        {/* Global System Alerts (RF-14) */}
+        {/* Global System Alerts */}
         <section className="bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl rounded-xl p-4 md:p-6">
           <div className="flex items-center gap-2 mb-6">
             <span className="material-symbols-outlined text-[#34AB1E] text-lg">notifications</span>
-            <h3 className="text-lg font-bold">Notificaciones Administrativas (RF-14)</h3>
+            <h3 className="text-lg font-bold">Notificaciones Administrativas</h3>
           </div>
           <div className="space-y-6">
             {/* Row 1 */}
@@ -104,7 +142,7 @@ export default function AdminSettings() {
 
         {/* Master Save Button */}
         <div className="flex justify-end w-full mt-4 pb-10">
-          <button className="bg-[#34AB1E] hover:bg-[#2d941a] text-white font-bold py-4 px-12 rounded-xl w-full sm:w-auto shadow-lg shadow-[#34AB1E]/20 transition-all active:scale-95">
+          <button className="bg-[#34AB1E] hover:bg-[#2d941a] text-white font-bold py-4 px-12 rounded-xl w-full sm:w-auto shadow-lg shadow-[#34AB1E]/20 transition-all active:scale-95" onClick={handleGuardarPreferencias}>
             Guardar Preferencias
           </button>
         </div>

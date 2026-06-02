@@ -14,14 +14,19 @@ export default function StudentLayout() {
 
   const [userEmail, setUserEmail] = useState('');
   const [userInitials, setUserInitials] = useState('ES');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && user.email) {
-        setUserEmail(user.email);
-        const namePart = user.email.split('@')[0];
-        const initials = namePart.substring(0, 2).toUpperCase();
+      const { data, error } = await supabase.auth.getUser();
+      if (error) console.error('Error fetching user', error);
+      const userData = data?.user;
+      if (userData) {
+        setUser(userData);
+        setUserEmail(userData.email);
+        const fullName = userData.user_metadata?.full_name;
+        const nameForInitials = fullName || userData.email.split('@')[0];
+        const initials = nameForInitials.substring(0, 2).toUpperCase();
         setUserInitials(initials || 'ES');
       }
     };
@@ -121,6 +126,14 @@ export default function StudentLayout() {
               </Link>
             ))}
           </nav>
+          {/* Profile Access Link */}
+          <Link to="/estudiante/configuracion" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 p-2 bg-white/[0.03] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.08] hover:border-white/10 transition-all duration-300 -mx-2 mb-4">
+             <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm">{userInitials}</div>
+             <div className="flex-grow min-w-0">
+               <p className="text-sm font-bold truncate">{user?.user_metadata?.full_name || userEmail.split('@')[0] || 'Estudiante'}</p>
+               <span className="text-[10px] font-bold text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">{user?.user_metadata?.semestre ? `ESTUDIANTE - ${user.user_metadata.semestre}` : 'ESTUDIANTE'}</span>
+             </div>
+           </Link>
           <div className="mt-auto pt-6 border-t border-white/10">
             <button
               onClick={handleSignOut}
@@ -162,13 +175,13 @@ export default function StudentLayout() {
         </nav>
         {/* Profile Card */}
         <div className="mt-auto pt-6 border-t border-white/10">
-          <Link to="/estudiante/configuracion" className="flex items-center gap-3 p-2 bg-white/[0.03] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.08] hover:border-white/10 transition-all duration-300 -mx-2">
-            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm">{userInitials}</div>
-            <div className="flex-grow min-w-0">
-              <p className="text-sm font-bold truncate">{userEmail.split('@')[0] || 'Estudiante'}</p>
-              <span className="text-[10px] font-bold text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">ESTUDIANTE</span>
-            </div>
-          </Link>
+           <Link to="/estudiante/configuracion" className="flex items-center gap-3 p-2 bg-white/[0.03] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.08] hover:border-white/10 transition-all duration-300 -mx-2">
+             <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm">{userInitials}</div>
+             <div className="flex-grow min-w-0">
+               <p className="text-sm font-bold truncate">{user?.user_metadata?.full_name || userEmail.split('@')[0] || 'Estudiante'}</p>
+               <span className="text-[10px] font-bold text-zinc-400 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">{user?.user_metadata?.semestre ? `ESTUDIANTE - ${user.user_metadata.semestre}` : 'ESTUDIANTE'}</span>
+             </div>
+           </Link>
           <button onClick={handleSignOut} className="flex items-center gap-3 mt-4 px-4 py-2 text-red-400 hover:text-red-300 transition-colors w-full text-left bg-transparent border-none outline-none">
             <span className="material-symbols-outlined text-[20px]">logout</span>
             <span className="text-sm font-medium">Cerrar Sesión</span>
